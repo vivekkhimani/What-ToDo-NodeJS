@@ -10,7 +10,7 @@ const mysql = require('mysql');
 const connection = mysql.createConnection({
    host: 'localhost',
    user: 'root',
-   password: '',
+   password: 'password',
    database: 'what_todo'
 });
 
@@ -55,6 +55,17 @@ app.use(allowCrossDomain);
 
 //INSERT GET AND POST ENDPOINTS
 
+connection.query('SELECT pet.name as name, species FROM pet, owners WHERE pet.owner=owners.id && owners.name = \'Abbi\'', 
+function(err, rows, fields) {
+    if (err) {
+        console.log('Error during query processing');
+    }
+    else {
+        for (let i = 0; i < rows.length; i++) {
+            console.log(rows[i].name, rows[i].species);
+        };
+    }
+});
 
 //listen
 app.listen(port, () => console.log('Listening on port '+port));
