@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/vivekkhimani/What-ToDo-NodeJS#readme",
   "dependencies": {
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "express": "^4.17.1",
+    "request": "^2.88.2"
   }
 }

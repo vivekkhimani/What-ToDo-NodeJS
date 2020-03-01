@@ -10,13 +10,26 @@ const mysql = require('mysql');
 const connection = mysql.createConnection({
    host: 'localhost',
    user: 'root',
-   password: 'password',
-   database: 'todo_list'
+   password: '',
+   database: 'what_todo'
 });
 
 connection.connect((err) => {
-   if (err) throw err;
-   console.log('Connected');
+   if (err){
+   console.log(err);
+   }
+   else{
+	  console.log('SUCCESS');
+   }
+});
+
+connection.end((err) => {
+   if (err){
+	  console.log(err);
+   }
+   else{
+	  console.log("TERMINATED");
+   }
 });
 
 //initiating server and app
