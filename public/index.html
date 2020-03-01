@@ -5,6 +5,7 @@
         <title>
            Login
         </title>
+        <script src="index.js"></script>
         <link rel="stylesheet" type="text/css" href="styling.css">
     </head>
     <body>
@@ -12,11 +13,11 @@
 
         <div class="login">
             <label for="email">Email</label> 
-            <input type="text" name="email" required>
+            <input type="text" id="email" required>
             
-            <label for="pswd">Password</label>
+            <label for="password">Password</label>
             
-            <input type="text" name="pswd" required>
+            <input type="text" id="password" required>
             <button type="submit">Login</button>
         </div>
 
@@ -24,21 +25,23 @@
 
         <div class="createAcct">
             <label for="fName">First Name</label> 
-            <input type="text" name="fName" required>
+            <input type="text" id="fName" required>
 
             <label for="lName">Last Name</label> 
-            <input type="text" name="lName" required>
+            <input type="text" id="lName" required>
             
             <label for="emailCA">Email</label> 
-            <input type="text" name="emailCA" required>
+            <input type="text" id="emailCA" required>
             
-            <label for="pswdCA">Password</label>
-            <input type="text" name="pswdCA" required>
+            <label for="passwordCA">Password</label>
+            <input type="text" id="passwordCA" required>
             
-            <label for="conPswdCA">Confirm Password</label>
-            <input type="text" name="conPswdCA" required>
+            <label for="passwordConfirmCA">Confirm Password</label>
+            <input type="text" id="passwordConfirmCA" required>
             
-            <button type="submit">Create Account</button>
+            <button type="submit" onclick="createAccount()">Create Account</button>
         </div>
+
+        <div id="formErrors" style="display:none; color:red;"></div>
     </body>
 </html>
