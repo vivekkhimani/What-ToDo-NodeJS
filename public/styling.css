@@ -15,3 +15,8 @@ td{
     display: none;
     color: red;
 }
+
+#loginErrors{
+    display: none;
+    color: red;
+}

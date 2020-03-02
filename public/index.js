@@ -1,14 +1,74 @@
-function createAccount() {
-    var fname = document.getElementById("fnameCA")
-    var lname = document.getElementById("lnameCA")
-    var email = document.getElementById("emailCA")
-    var password = document.getElementById("passwordCA")
-    var passwordConfirm = document.getElementById("passwordConfirmCA")
+window.onload = function() {
+	document.getElementById("createAcct").addEventListener("click", createAccount);
+	document.getElementById("loginBtn").addEventListener("click",loginUser);
+}
 
-    checkInformation(fname, lname, email, password, passwordConfirm)
+function loginUser(event){
+	const loginErrors = document.getElementById('loginErrors');
+	loginErrors.style.display = "none";
+	const ul_init = document.createElement("ul");
+	loginErrors.appendChild(ul_init);
+
+	const email = document.getElementById("email");
+	const pass = document.getElementById("password");
+
+	if (email.value && pass.value){
+		const final_url = "http://localhost:3000/check_user?email="+email.value+"&password="+pass.value;
+		$.ajax({
+			url: final_url,
+			type: 'GET',
+			success: function(resp,msg){
+				console.log("new user data successfully received server");
+				//console.log(JSON.stringify(resp));
+				if (resp[0]){
+					window.location.href = "main.html";
+					console.log(resp);
+				}
+				else{
+					loginErrors.style.display = "block";
+					const li_init = document.createElement("li");
+					li_init.appendChild(document.createTextNode("User not found or password doesn't match"));
+					ul_init.appendChild(li_init);
+					ul_init.appendChild(li_init);
+				}
+			},
+			error: function(jqXHR,status,err){
+				console.log(status);
+				console.log(err);
+				loginErrors.style.display = "block";
+				const li_init = document.createElement("li");
+				li_init.appendChild(document.createTextNode("Error getting the request"));
+				ul_init.appendChild(li_init);
+			}
+		});
+	}
+
+	else{
+		//missing values
+		loginErrors.style.display = "block";
+		const li_init = document.createElement("li");
+		li_init.appendChild(document.createTextNode("Missing email or password field."));
+		ul_init.appendChild(li_init);
+	}
+}
+
+function createAccount(event) {
+    const fname = document.getElementById("fNameCA");
+    const lname = document.getElementById("lNameCA");
+    const email = document.getElementById("emailCA");
+    const password = document.getElementById("passwordCA");
+    const passwordConfirm = document.getElementById("passwordConfirmCA");
+
+    checkInformation(fname, lname, email, password, passwordConfirm);
 }
 
 function checkInformation(fname, lname, email, password, passwordConfirm) {
+	fnameGood = true;
+	lnameGood = true;
+	emailGood = true;
+	passwordGood = true;
+	passwordConfirmGood = true;
+
     var formErrors = document.getElementById("formErrors");
     formErrors.style.display = "none";
 
@@ -19,15 +79,15 @@ function checkInformation(fname, lname, email, password, passwordConfirm) {
 	newUl = document.createElement("ul");
 	formErrors.appendChild(newUl);
 
-    if (fName.value.length < 1) {
-		fullNameGood = false;
+    if (fname.value.length < 1) {
+		fnameGood = false;
 		newLi = document.createElement("li");
 		newLi.appendChild(document.createTextNode("Missing first name."));
 		newUl.appendChild(newLi);
     }
     
-    if (lName.value.length < 1) {
-		fullNameGood = false;
+    if (lname.value.length < 1) {
+		lnameGood = false;
 		newLi = document.createElement("li");
 		newLi.appendChild(document.createTextNode("Missing last name."));
 		newUl.appendChild(newLi);
@@ -58,7 +118,38 @@ function checkInformation(fname, lname, email, password, passwordConfirm) {
 		newUl.appendChild(newLi);
     }
     
-    if ((fName == false) || (lname == false) || (emailGood == false) || (passwordGood == false) || (passwordConfirmGood == false)) {
+    if ((fnameGood == false) || (lnameGood == false) || (emailGood == false) || (passwordGood == false) || (passwordConfirmGood == false)) {
 		formErrors.style.display = "block";
+	}
+
+    //database post request
+	if ((fnameGood == true) && (lnameGood == true) && (emailGood == true) && (passwordGood == true) && (passwordConfirmGood == true)) {
+		var send_data = {};
+		send_data.first_name = fname.value;
+		send_data.last_name = lname.value;
+		send_data.email = email.value;
+		send_data.password = password.value;
+
+		$.ajax({
+			url: 'http://localhost:3000/post_db',
+			type: 'POST',
+			data: send_data,
+			success: function(msg){
+				console.log("new user data successfully sent to server");
+				console.log(JSON.stringify(send_data));
+				formErrors.style.display = "none";
+				formErrors.removeChild(formErrors.firstChild);
+				window.location.href = "main.html";
+			},
+			error: function(jqXHR,status,err){
+				console.log(status);
+				console.log(err);
+				formErrors.style.display = "block";
+				newLi = document.createElement("li");
+				newLi.appendChild(document.createTextNode("Email already exists."));
+				newUl.appendChild(newLi);
+
+			}
+		});
 	}
 }
