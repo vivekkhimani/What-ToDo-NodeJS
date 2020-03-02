@@ -3,8 +3,11 @@ A simple to-do app created using NodeJS, Express Server, MySQL DB, and tradition
 
 ### Files & Directories:
 - server.js
+- database.js
 - public/
+- sql_scripts/
 - package.json
+- package-lock.json
 
 ### Tools:
 - Node JS 
