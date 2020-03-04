@@ -21,7 +21,9 @@ function loginUser(event){
 				console.log("new user data successfully received server");
 				//console.log(JSON.stringify(resp));
 				if (resp[0]){
-					window.location.href = "main.html";
+					//NOTE: We cannot simply render same page for every user. So we will have a server GET endpoint called /main, which will redirect to custom pages for different users.
+					//NOTE (cont): So this client redirect is temporary. We will ultimately make a GET request to /main, which will render appropriate HTML code.
+					window.location.href = "http://localhost:3000/"
 					console.log(resp);
 				}
 				else{
@@ -135,11 +137,13 @@ function checkInformation(fname, lname, email, password, passwordConfirm) {
 			type: 'POST',
 			data: send_data,
 			success: function(msg){
-				console.log("new user data successfully sent to server");
+				console.log("new user data successfully sent to server. Please log in using your new credentials.");
 				console.log(JSON.stringify(send_data));
-				formErrors.style.display = "none";
-				formErrors.removeChild(formErrors.firstChild);
-				window.location.href = "main.html";
+				formErrors.style.display = "block";
+				newLi = document.createElement('li');
+				newLi.appendChild(document.createTextNode("New user data successfully sent to server. Please log in using your new credentials."));
+				newUl.appendChild(newLi);
+				//window.location.href = "main.html";
 			},
 			error: function(jqXHR,status,err){
 				console.log(status);

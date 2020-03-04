@@ -4,6 +4,10 @@ const request = require('request');
 const bodyParser = require('body-parser');
 const connection = require('./database');
 const crypto = require('crypto');
+const session = require('express-session');
+const path = require('path');
+require('dotenv').config();
+
 
 //generating salt for password hashing
 var genSalt = function(length){
@@ -31,7 +35,20 @@ var sha512 = function(password,salt){
 //initiating server and app
 const app = express();
 const port = 3000;
-app.use(express.static('public'));
+
+//trying to implement sessions
+app.use(session({
+   secret: process.env.SESSION_SECRET,
+   resave: true,
+   saveUninitialized: true,
+   loggedin: false,
+   user_email: null,
+   first_name: null,
+   last_name: null
+}));
+//
+
+app.use('/login',express.static('public'));
 
 //allow sending and receiving different objects
 app.use(bodyParser.urlencoded({
@@ -48,6 +65,19 @@ var allowCrossDomain = function(req,res,next){
 	next();
 };
 app.use(allowCrossDomain);
+
+//default pathname redirects to login page
+app.get('/',function(req,resp){
+	console.log(req.session);
+	//redirect to main page if logged in
+	if (req.session.loggedin){
+		resp.redirect('/main');
+	}
+	//redirect to login page if not
+	else{
+		resp.redirect('/login');
+	}
+});
 
 //db test endpoint for seeing the data in the db. WILL BE REMOVED AFTER DEV IS COMPLETE
 app.route('/test_db').get(function(req,res,next){
@@ -66,18 +96,80 @@ app.get('/check_user',function(req,res,next){
 	const my_pass = req.query.password;
 	const pass = normalHash(my_pass);
 
-	console.log(user_email);
-	console.log(pass);
 
 	//make sql query
-	connection.query("SELECT email from `users` WHERE email='"+user_email+"' AND password_hash='"+pass+"'",function (error,results,fields) {
+	connection.query("SELECT first_name,last_name,email from `users` WHERE email='"+user_email+"' AND password_hash='"+pass+"'",function (error,results,fields) {
+		//some internal sql error only
 		if (error) throw error;
-		console.log("reached");
-		//res.json(results);
-		res.send(results);
+
+		else{
+			console.log("reached");
+			//user found
+			if (results[0]){
+				//continue here and bring in authentication and redirect logic here
+				//remove the redirect and stuff from index.js. Only keep the logic for displaying errors. Otherwise, console.log everything.
+				req.session.loggedin = true;
+				req.session.user_email = user_email;
+				req.session.first_name = results[0].first_name;
+				req.session.last_name = results[0].last_name;
+				res.send(results);
+		}
+			//user not found
+			else{
+				//error display logic to be handled at client
+				console.log("user not found.")
+				res.send(results);
+			}
+		}
 	}
 	);
 });
+
+//an endpoint that renders cutomized homepage for the logged in user. REMEMBER, all the users will not have a common homepage.
+app.get('/main',function(req,res,next){
+	if (req.session.loggedin){
+		res.send("<h1>Hello "+req.session.first_name+" "+req.session.last_name+"!</h1>");
+	}
+	else{
+		res.send("You need to login to access this page.");
+	}
+});
+
+//signout endpoint - have a signout button in the client and bind this endpoint with it.
+//PENDING BINDING ON CLIENT SIDE.
+app.get('/signout',function(req,res,next){
+	req.session.loggedin = false;
+	req.session.user_email = null;
+	req.session.first_name = null;
+	req.session.last_name = null;
+	res.redirect("/");
+});
+
+//db post endpoint for deleting your account. create a button on user homepage and bind this endpoint with it.
+//PENDING BINDING ON CLIENT SIDE.
+app.post('/remove_db',function(req,res,next){
+	const data = req;
+	const user_email = data.body.user_email;
+
+	req.session.loggedin = false;
+	req.session.user_email = null;
+	req.session.first_name = null;
+	req.session.last_name = null;
+
+	//INSERT A DELETE QUERY HERE
+	connection.query(
+		"DELETE from `users` WHERE email='"+user_email+"'",
+			function(error,results,fields){
+			   if (error){
+				  throw error;
+			   }
+			   else{
+				  console.log("user deleted");
+				  res.redirect("/");
+			   }
+			});
+});
+
 
 //db post endpoint for creating new user for create account
 app.post('/post_db',function (req,res,next) {
