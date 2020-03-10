@@ -128,7 +128,8 @@ app.get('/check_user',function(req,res,next){
 //an endpoint that renders cutomized homepage for the logged in user. REMEMBER, all the users will not have a common homepage.
 app.get('/main',function(req,res,next){
 	if (req.session.loggedin){
-		res.send("<h1>Hello "+req.session.first_name+" "+req.session.last_name+"!</h1>");
+		//res.send("<h1>Hello "+req.session.first_name+" "+req.session.last_name+"!</h1>");
+		res.sendFile(path.join(__dirname,'public','main.html'));
 	}
 	else{
 		res.send("You need to login to access this page.");
