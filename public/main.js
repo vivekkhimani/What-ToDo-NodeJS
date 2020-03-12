@@ -1,6 +1,8 @@
 window.onload = function() {
-    document.getElementById("signoutBtn").addEventListener("click", signoutUser)
-    requestData()
+    document.getElementById("signoutBtn").addEventListener("click", signoutUser);
+    document.getElementById("showRemoveBtn").addEventListener("click", showRemoveBtn);
+    document.getElementById("removeBtn").addEventListener("click", removeUser);
+    requestData();
 }
 
 function signoutUser(event) {
@@ -42,4 +44,29 @@ function requestData() {
 function formatUserInfo(userInfo) {
     text = document.getElementById("userInfo");
     text.innerHTML = "Hello, " + userInfo.first_name + " " + userInfo.last_name;
+}
+
+function showRemoveBtn(event) {
+    document.getElementById("removeUser").style.display = "block";
+}
+
+function removeUser(event) {
+    var send_data = {};
+    send_data.email = document.getElementById("email").value;
+    console.log(send_data.email)
+
+    $.ajax({
+        url: 'http://localhost:3000/remove_db',
+        type: 'POST',
+        data: send_data,
+        success: function(msg){
+            console.log(JSON.stringify(send_data));
+            window.location.href = "http://localhost:3000/";
+        },
+        error: function(jqXHR,status,err){
+            document.getElementById("removalError").innerHTML = "That is not your email";
+            console.log(status);
+            console.log(err);
+        }
+    });
 }

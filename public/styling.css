@@ -16,7 +16,11 @@ td{
     color: red;
 }
 
-#loginErrors{
+#loginErrors {
     display: none;
     color: red;
+}
+
+#removeUser {
+    display: none;
 }
