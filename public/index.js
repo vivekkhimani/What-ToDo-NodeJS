@@ -3,7 +3,7 @@ window.onload = function() {
 	document.getElementById("loginBtn").addEventListener("click",loginUser);
 }
 
-function loginUser(event){
+function loginUser(){
 	const loginErrors = document.getElementById('loginErrors');
 	loginErrors.style.display = "none";
 	const ul_init = document.createElement("ul");
@@ -139,11 +139,11 @@ function checkInformation(fname, lname, email, password, passwordConfirm) {
 			success: function(msg){
 				console.log("new user data successfully sent to server. Please log in using your new credentials.");
 				console.log(JSON.stringify(send_data));
-				formErrors.style.display = "block";
-				newLi = document.createElement('li');
-				newLi.appendChild(document.createTextNode("New user data successfully sent to server. Please log in using your new credentials."));
-				newUl.appendChild(newLi);
-				//window.location.href = "main.html";
+
+				// logins in user if account created
+				document.getElementById("email").value = email.value;
+				document.getElementById("password").value = password.value;
+				loginUser();
 			},
 			error: function(jqXHR,status,err){
 				console.log(status);

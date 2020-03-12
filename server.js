@@ -183,7 +183,11 @@ app.get('/signout',function(req,res,next){
 //PENDING BINDING ON CLIENT SIDE.
 app.post('/remove_db',function(req,res,next){
 	const data = req;
-	const user_email = data.body.user_email;
+	const user_email = data.body.email;
+
+	if (user_email != req.session.user_email) {
+		throw error;
+	}
 
 	req.session.loggedin = false;
 	req.session.user_email = null;
