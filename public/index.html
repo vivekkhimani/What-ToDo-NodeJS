@@ -14,39 +14,39 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     </head>
     <body>
-        <div class="text-left">
-            <h1>Login:</h1>
+        <div  class="outerDiv">
+            <h1>Login</h1>
 
             <div class="login">
-                <label for="email">Email</label> 
-                <input type="text" id="email" required>
-                
-                <label for="password">Password</label>
-                <input type="password" id="password" required>
-
+                <!--<label for="email">Email</label>--> 
+                <input type="text" id="email" placeholder="email" required>
+                <br>
+                <!--<label for="password">Password</label>-->
+                <input type="password" id="password" placeholder="password" required>
+                <br>
                 <button type="submit" class="btn btn-outline-info" id="loginBtn">Login</button>
             </div>
 
             <div id="loginErrors"></div>
 
-            <h1>Create Account:</h1>
+            <h1>Create Account</h1>
 
             <div class="createAcct">
-                <label for="fNameCA">First Name</label>
-                <input type="text" id="fNameCA" required>
-
-                <label for="lNameCA">Last Name</label>
-                <input type="text" id="lNameCA" required>
-                
-                <label for="emailCA">Email</label> 
-                <input type="text" id="emailCA" required>
-                
-                <label for="passwordCA">Password</label>
-                <input type="password" id="passwordCA" required>
-                
-                <label for="passwordConfirmCA">Confirm Password</label>
-                <input type="password" id="passwordConfirmCA" required>
-                
+                <!--<label for="fNameCA">First Name</label>-->
+                <input type="text" id="fNameCA"  placeholder="first name" required>
+                <br>
+                <!--<label for="lNameCA">Last Name</label>-->
+                <input type="text" id="lNameCA" placeholder="last name" required>
+                <br>
+                <!--<label for="emailCA">Email</label> -->
+                <input type="text" id="emailCA" placeholder="email" required>
+                <br>
+                <!--<label for="passwordCA">Password</label>-->
+                <input type="password" id="passwordCA" placeholder="password" required>
+                <br>
+                <!--<label for="passwordConfirmCA">Confirm Password</label>-->
+                <input type="password" id="passwordConfirmCA" placeholder="confirm password" required>
+                <br>
                 <button type="submit" class="btn btn-outline-info" id="createAcct">Create Account</button>
             </div>
 
