@@ -125,6 +125,39 @@ app.get('/check_user',function(req,res,next){
 	);
 });
 
+// endpoint that gets first and last name of user
+app.get("/get_user_info", function(req, res) {
+    // Get values from the session data
+	user_email = req.session.user_email;
+
+	/* alternate way Vivek - res.send(req.session) */
+	
+    // get user info from database
+    connection.query("SELECT first_name,last_name,email from `users` WHERE email='"+user_email+"'",function (error,results,fields) {
+		//some internal sql error only
+		if (error) throw error;
+
+		else{
+			console.log("reached");
+			//user found
+			if (results[0]){
+				//send info to client
+				res.type("application/json");
+        		res.send(results);
+			}
+			//user not found
+			else{
+				//error display logic to be handled at client
+				console.log("user not found.")
+				res.send(results);
+			}
+		}
+	}
+	);
+	
+});
+
+
 //an endpoint that renders cutomized homepage for the logged in user. REMEMBER, all the users will not have a common homepage.
 app.get('/main',function(req,res,next){
 	if (req.session.loggedin){
