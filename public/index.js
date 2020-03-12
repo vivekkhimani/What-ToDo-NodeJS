@@ -7,7 +7,13 @@ function loginUser(){
 	const loginErrors = document.getElementById('loginErrors');
 	loginErrors.style.display = "none";
 	const ul_init = document.createElement("ul");
+
+	while (loginErrors.hasChildNodes()) {
+		loginErrors.removeChild(loginErrors.firstChild)
+	}
+
 	loginErrors.appendChild(ul_init);
+
 
 	const email = document.getElementById("email");
 	const pass = document.getElementById("password");
@@ -77,7 +83,7 @@ function checkInformation(fname, lname, email, password, passwordConfirm) {
     while (formErrors.hasChildNodes()) {
 		formErrors.removeChild(formErrors.firstChild)
 	}
-
+	
 	newUl = document.createElement("ul");
 	formErrors.appendChild(newUl);
 
@@ -116,6 +122,7 @@ function checkInformation(fname, lname, email, password, passwordConfirm) {
 		passwordGood = false;
 		passwordConfirmGood = false;
 		newLi = document.createElement("li");
+		
 		newLi.appendChild(document.createTextNode("Password and confirmation password don't match."));
 		newUl.appendChild(newLi);
     }
