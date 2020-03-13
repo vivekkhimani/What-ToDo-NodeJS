@@ -2,7 +2,45 @@ window.onload = function() {
     document.getElementById("signoutBtn").addEventListener("click", signoutUser);
     document.getElementById("showRemoveBtn").addEventListener("click", showRemoveBtn);
     document.getElementById("removeBtn").addEventListener("click", removeUser);
+    document.getElementById("addTaskBtn").addEventListener("click", addTask)
     requestData();
+}
+
+function addTask() {
+    var task = document.getElementById("task").value;
+    var dueDate = document.getElementById("dueDate").value
+    var priority = document.getElementById("priority").value;
+    var taskErrors = document.getElementById("taskErrors");
+    taskErrors.innerHTML = "";
+
+    var taskErrors = document.getElementById("taskErrors");
+    if (task.length < 1) {
+        taskErrors.innerHTML = "Enter a task or your account will be deleted";
+    }
+
+    dueDate = dueDate.replace("T", " ")
+    dueDate += ":00";
+
+    priority = parseInt(priority);
+
+    var send_data = {};
+    send_data.task = task;
+    send_data.dueDate = dueDate;
+    send_data.priority = priority;
+
+    $.ajax({
+        url: 'http://localhost:3000/add_task',
+        type: 'POST',
+        data: send_data,
+        success: function(msg){
+            console.log(JSON.stringify(send_data));
+            window.location.href = "http://localhost:3000/";
+        },
+        error: function(jqXHR,status,err){
+            console.log(status);
+            console.log(err);
+        }
+    });
 }
 
 function signoutUser(event) {
@@ -43,7 +81,7 @@ function requestData() {
 
 function formatUserInfo(userInfo) {
     text = document.getElementById("userInfo");
-    text.innerHTML = "Hello, " + userInfo.first_name + " " + userInfo.last_name;
+    text.innerHTML = "Welcome, " + userInfo.first_name;
 }
 
 function showRemoveBtn(event) {

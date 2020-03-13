@@ -90,6 +90,17 @@ app.route('/test_db').get(function(req,res,next){
 	);
 });
 
+//db test endpoint for seeing the data in the current db
+app.route('/test_db2').get(function(req,res,next){
+	connection.query(
+		"SELECT * from `current`",
+		function(error,results,fields){
+			if (error) throw error;
+			res.json(results);
+		}
+	);
+});
+
 //db get user endpoint for login verification
 app.get('/check_user',function(req,res,next){
 	const user_email = req.query.email;
@@ -113,7 +124,7 @@ app.get('/check_user',function(req,res,next){
 				req.session.first_name = results[0].first_name;
 				req.session.last_name = results[0].last_name;
 				res.send(results);
-		}
+			}
 			//user not found
 			else{
 				//error display logic to be handled at client
@@ -226,6 +237,25 @@ app.post('/post_db',function (req,res,next) {
 			}
 			else{
 				res.status(200).send("user added.");
+			}
+		}
+	);
+});
+
+app.post('/add_task',function (req,res,next) {
+	const data = req;
+	const email = req.session.user_email;
+	const task = data.body.task;
+	const dueDate = data.body.dueDate;
+	const priority = data.body.priority;
+	connection.query(
+		"INSERT into `current` VALUES('"+email+"','"+task+"','"+dueDate+"','"+priority+"')", //finish the query
+		function(error,results,fields){
+			if (error){
+				res.status(400).send("Task could not be added");
+			}
+			else{
+				res.status(200).send("Task added.");
 			}
 		}
 	);

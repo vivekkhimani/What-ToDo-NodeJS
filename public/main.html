@@ -31,6 +31,26 @@
 			<p id="p2"></p>
 		</div>
 		<p id="removalError"></p>
+
+		<div>
+			<h3>Add task</h3>
+
+			<label for="task">Task: </label> 
+			<input type="text" id="task" required>
+			<br>
+			<label for="dueDate">Due date:</label>
+			<input type="datetime-local" id="dueDate">
+			<br>
+			<label for="priority">Priority:</label>
+			<select id="priority">
+				<option value="1">1</option>
+				<option value="2">2</option>
+				<option value="3">3</option>
+			  </select>
+		</div>
+
+		<button id="addTaskBtn">Add task</button>
+		<p id="taskErrors"></p>
 	</body>
 </html>
 
