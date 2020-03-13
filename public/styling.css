@@ -1,5 +1,23 @@
+h1 {
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    color : #17a2b7;
+}
+
+#topLine, #header {
+    display : flex;
+    flex-direction : row;
+    justify-content: flex-end;
+}
+#header {
+    align-self: flex-start;
+}
+/*
+#signoutBtn, #showRemoveBtn {
+    align-self: flex-end;
+}*/
 
 .outerDiv {
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
     text-align: center;
     display: inline-block;
     background:white;
@@ -11,8 +29,13 @@
     left: 50%;
     margin-left: -200px;
     padding:0px 0px 70px 0px;
-    border: #2980b9 4px solid; 
+    border: #17a2b7 4px solid; 
+    height:100vh;
+    overflow:scroll;
+    overflow-x:hidden;
 }
+
+
 
 .login input, .login label {
     /*display: flex;*/
