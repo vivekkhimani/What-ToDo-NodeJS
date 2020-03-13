@@ -163,10 +163,35 @@ app.get("/get_user_info", function(req, res) {
 				res.send(results);
 			}
 		}
-	}
-	);
-	
+	});
 });
+
+app.get("/get_task",function(req, res, next){
+	user_email = req.session.user_email;
+
+  // get user info from database
+	connection.query("SELECT task, due_date, priority from `current` WHERE email='"+user_email+"'",function (error,results,fields) {
+		//some internal sql error only
+		if (error) throw error;
+
+		else{
+			console.log("reached");
+			//user found
+			if (results[0]){
+				//send info to client
+				res.type("application/json");
+				res.send(results);
+			}
+			//user not found
+			else{
+				//error display logic to be handled at client
+				console.log("user not found.")
+				res.send(results);
+			}
+		}
+	});
+});
+
 
 
 //an endpoint that renders cutomized homepage for the logged in user. REMEMBER, all the users will not have a common homepage.
@@ -249,9 +274,10 @@ app.post('/add_task',function (req,res,next) {
 	const dueDate = data.body.dueDate;
 	const priority = data.body.priority;
 	connection.query(
-		"INSERT into `current` VALUES('"+email+"','"+task+"','"+dueDate+"','"+priority+"')", //finish the query
+		"INSERT into `current` (email, task, due_date, priority) VALUES('"+email+"','"+task+"','"+dueDate+"','"+priority+"')", //finish the query
 		function(error,results,fields){
 			if (error){
+				throw error;
 				res.status(400).send("Task could not be added");
 			}
 			else{
