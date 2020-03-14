@@ -40,7 +40,6 @@ h1 {
 .login input, .login label {
     /*display: flex;*/
     margin:2px 0 20px 10px;
-    
 }
 
 .createAcct input, .createAcct label {

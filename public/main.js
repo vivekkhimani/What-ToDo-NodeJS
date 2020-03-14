@@ -4,6 +4,7 @@ window.onload = function() {
     document.getElementById("removeBtn").addEventListener("click", removeUser);
     document.getElementById("addTaskBtn").addEventListener("click", addTask)
     requestData();
+    requestTasks();
 }
 
 function addTask() {
@@ -82,6 +83,50 @@ function requestData() {
 function formatUserInfo(userInfo) {
     text = document.getElementById("userInfo");
     text.innerHTML = "Welcome, " + userInfo.first_name;
+}
+
+function requestTasks() {
+    let xhttp = new XMLHttpRequest();
+
+    // ran when server sends response
+    xhttp.onreadystatechange = function() {
+        if(xhttp.readyState == 4 && xhttp.status == 200) {
+            let json = JSON.parse(xhttp.responseText);
+            //let userInfo = json[0];
+            console.log(json);
+            formatTasks(json);
+        }
+    };
+
+    // sends request to server
+    let URL = "http://localhost:3000/get_task"
+    xhttp.open("GET",URL,true);
+    xhttp.setRequestHeader("Content-Type",
+    "application/json;charset=UTF-8");
+    xhttp.send();
+}
+
+
+function formatTasks(taskJson) {
+    taskTable = document.getElementById("tasks");
+    //console.log(taskJson.length);
+
+    taskTable.innerHTML = "";
+
+    //Empty row is created and filled with the column headers
+    var row = taskTable.insertRow(0);
+    row.insertCell(0).innerHTML = "Task";
+    row.insertCell(1).innerHTML = "Due Date";
+    row.insertCell(2).innerHTML = "Priority";
+    
+    for (i=0; i<taskJson.length; i++) {
+        
+        row = taskTable.insertRow(i+1); 
+        row.insertCell(0).innerHTML = taskJson[i].task;
+        row.insertCell(1).innerHTML = taskJson[i].due_date;
+        row.insertCell(2).innerHTML = taskJson[i].priority;
+    }
+    //text.innerHTML = "Welcome, " + userInfo.first_name;
 }
 
 function showRemoveBtn(event) {
