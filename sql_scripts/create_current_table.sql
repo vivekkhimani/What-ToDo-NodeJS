@@ -1,0 +1,7 @@
+CREATE TABLE current(
+	email VARCHAR(320) NOT NULL,
+	task VARCHAR(10000) NOT NULL,
+	due_date DATETIME NOT NULL,
+	priority INT NOT NULL,
+	PRIMARY KEY (email)
+	);

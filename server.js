@@ -101,6 +101,18 @@ app.route('/test_db2').get(function(req,res,next){
 	);
 });
 
+//db test endpoint for seeing the data in history db
+app.route('/test_db3').get(function(req,res,next){
+	connection.query(
+		"SELECT * from `history`",
+		function(error,results,fields){
+			if (error) throw error;
+			res.json(results);
+		}
+	);
+});
+
+
 //db get user endpoint for login verification
 app.get('/check_user',function(req,res,next){
 	const user_email = req.query.email;
@@ -138,60 +150,88 @@ app.get('/check_user',function(req,res,next){
 
 // endpoint that gets first and last name of user
 app.get("/get_user_info", function(req, res) {
-    // Get values from the session data
-	user_email = req.session.user_email;
+	if (req.session.loggedin) {
+		// Get values from the session data
+		user_email = req.session.user_email;
 
-	/* alternate way Vivek - res.send(req.session) */
-	
-    // get user info from database
-    connection.query("SELECT first_name,last_name,email from `users` WHERE email='"+user_email+"'",function (error,results,fields) {
-		//some internal sql error only
-		if (error) throw error;
+		/* alternate way Vivek - res.send(req.session) */
 
-		else{
-			console.log("reached");
-			//user found
-			if (results[0]){
-				//send info to client
-				res.type("application/json");
-        		res.send(results);
+		// get user info from database
+		connection.query("SELECT first_name,last_name,email from `users` WHERE email='" + user_email + "'", function (error, results, fields) {
+			//some internal sql error only
+			if (error) throw error;
+
+			else {
+				console.log("reached");
+				//user found
+				if (results[0]) {
+					//send info to client
+					res.type("application/json");
+					res.send(results);
+				}
+				//user not found
+				else {
+					//error display logic to be handled at client
+					console.log("user not found.")
+					res.send(results);
+				}
 			}
-			//user not found
-			else{
-				//error display logic to be handled at client
-				console.log("user not found.")
-				res.send(results);
-			}
-		}
-	});
+		});
+	}
+	else{
+		res.send("You need to login to access this endpoint.")
+	}
 });
 
 app.get("/get_task",function(req, res, next){
-	user_email = req.session.user_email;
+	if (req.session.loggedin) {
+		const user_email = req.session.user_email;
 
-  // get user info from database
-	connection.query("SELECT task, due_date, priority from `current` WHERE email='"+user_email+"'",function (error,results,fields) {
-		//some internal sql error only
-		if (error) throw error;
+		// get user info from database
+		connection.query("SELECT task, due_date, priority from `current` WHERE email='" + user_email + "' ORDER BY due_date,priority", function (error, results, fields) {
+			//some internal sql error only
+			if (error) throw error;
 
-		else{
-			console.log("reached");
-			//user found
-			if (results[0]){
-				//send info to client
-				res.type("application/json");
-				res.send(results);
+			else {
+				console.log("reached");
+				//user found
+				if (results[0]) {
+					//send info to client
+					res.type("application/json");
+					res.send(results);
+				}
+				//user not found
+				else {
+					//error display logic to be handled at client
+					console.log("user not found.")
+					res.send(results);
+				}
 			}
-			//user not found
-			else{
-				//error display logic to be handled at client
-				console.log("user not found.")
-				res.send(results);
-			}
-		}
-	});
+		});
+	}
+	else{
+		res.send("You need to login to access this endpoint")
+	}
 });
 
+/*
+//temp
+app.get("/temp",function(req,res,next){
+	connection.query(
+		//"SHOW CREATE TABLE `history`",
+		//"ALTER TABLE `history` DROP PRIMARY KEY",
+			//"ALTER TABLE `history` ADD uid INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT",
+		"DESCRIBE `history`",
+		function(error,results,field){
+			if (error) throw error;
+			else{
+				res.json(results);
+				console.log("DROPPED");
+			}
+		}
+	);
+});
+*/
 
 
 //an endpoint that renders cutomized homepage for the logged in user. REMEMBER, all the users will not have a common homepage.
@@ -216,7 +256,7 @@ app.get('/signout',function(req,res,next){
 });
 
 //db post endpoint for deleting your account. create a button on user homepage and bind this endpoint with it.
-//PENDING BINDING ON CLIENT SIDE.
+
 app.post('/remove_db',function(req,res,next){
 	const data = req;
 	const user_email = data.body.email;
@@ -267,6 +307,48 @@ app.post('/post_db',function (req,res,next) {
 	);
 });
 
+
+//gets the history which will be used for recommending most frequently added task to users
+app.get('/get_history',function(req,res,next){
+	if (req.session.loggedin) {
+		const email = req.session.user_email;
+		connection.query(
+			"SELECT * FROM `history` WHERE email='"+email+"'ORDER BY counter DESC LIMIT 10",
+			function (error, results, fields) {
+				if (error) throw error;
+				else {
+					res.json(results);
+				}
+			}
+		);
+	}
+	else{
+		res.send("You need to log in to access this endpoint")
+	}
+});
+
+
+//delete task post endpoint
+//NOTE: This enpoint will be bound to a button in client code and will expect a TASK exactly as stored in db
+app.post('/delete_task',function(req,res,next){
+	if (req.session.loggedin){
+		const data = req;
+		const email = req.session.email;
+		const task = data.body.task;
+		connection.query(
+			"DELETE FROM `current` WHERE email='"+email+"'AND task='"+task+"'",
+			function(error,results,fields){
+				if (error) throw error;
+				else{
+					res.status(200).send("task deleted from current table");
+				}
+			}
+		);
+	}
+});
+
+
+//adds a new task in the database as a post request
 app.post('/add_task',function (req,res,next) {
 	const data = req;
 	const email = req.session.user_email;
@@ -278,10 +360,43 @@ app.post('/add_task',function (req,res,next) {
 		function(error,results,fields){
 			if (error){
 				throw error;
-				res.status(400).send("Task could not be added");
 			}
 			else{
-				res.status(200).send("Task added.");
+				//add history
+				connection.query(
+					"SELECT * FROM `history` WHERE email='"+email+"' AND task='"+task+"'",
+					function(error,results,fields){
+						if(error) throw error;
+						else{
+							console.log(results);
+							if (results[0]){
+								//increase count by 1 as the task already exists for the users
+								connection.query(
+									"UPDATE `history` SET counter = counter + 1 WHERE email='"+email+"' AND task='"+task+"'",
+									function (error,results,fields) {
+										if (error) throw error;
+										else{
+											console.log("task found in history.counter increased.");
+											res.status(200).send("Task added.");
+										}
+									}
+								);
+							}
+							else {
+								connection.query(
+									"INSERT INTO `history` (email,task,counter) VALUES('"+email+"','"+task+"',1)",
+									function (error,results,fields) {
+										if (error) throw error;
+										else{
+											console.log("task not found in history.now added.");
+											res.status(200).send("Task added.");
+										}
+									}
+								);
+							}
+						}
+					}
+				);
 			}
 		}
 	);
