@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const connection = require('./database');
 const crypto = require('crypto');
 const session = require('express-session');
+const tf = require('@tensorflow/tfjs');
+require('@tensorflow/tfjs-node');
+const encoder = require('@tensorflow-models/universal-sentence-encoder');
 const path = require('path');
 require('dotenv').config();
 
@@ -29,6 +32,19 @@ var sha512 = function(password,salt){
 		salt:salt,
 		passwordHash:value
 	};
+};
+
+//a function for calculating cosine similarity
+var similarity = function(a,b){
+	const magnitudeA = Math.sqrt(this.dot(a,a));
+	const magnitudeB = Math.sqrt(this.dot(b,b));
+
+	if (magnitudeA && magnitudeB){
+		return this.dot(a,b)/(magnitudeA * magnitudeB);
+	}
+	else{
+		return false;
+	}
 };
 
 
@@ -333,7 +349,7 @@ app.get('/get_history',function(req,res,next){
 app.post('/delete_task',function(req,res,next){
 	if (req.session.loggedin){
 		const data = req;
-		const email = req.session.user_email;	//Typo, this needs to be user_email
+		const email = req.session.user_email;
 		const task = data.body.task;
 		connection.query(
 			"DELETE FROM `current` WHERE email='"+email+"'AND task='"+task+"'",
@@ -345,6 +361,59 @@ app.post('/delete_task',function(req,res,next){
 			}
 		);
 	}
+});
+
+app.get('/get_custom_recommendations',function(req,res,next){
+	//get all the tasks FOR ALL USERS from history table using history database
+	//get all the tasks FOR CURRENTLY LOGGED IN user using history database
+	//vectorize using a common algorithm (TF,IDF,HF)
+	//recommend the top one using cosine similarity
+	//add a priority weightage while making recommendations
+	if (req.session.loggedin){
+		const email = req.session.user_email;
+		const all_tasks = [];
+		const user_tasks = [];
+		//get all historic tasks
+		connection.query(
+			"SELECT * FROM `history` WHERE email!='"+email+"'",
+			function(error,results,fields){
+				if (error) throw error;
+				else{
+					//get tasks for current user
+					connection.query(
+						"SELECT * FROM `history` WHERE email='"+email+"'",
+						function(err,my_results,fiel){
+							if (err) throw err;
+							else{
+								for (i=0;i<results.length;i++){
+									all_tasks.push(results[i].task.toLowerCase());
+								}
+								for (i=0;i<my_results.length;i++){
+									user_tasks.push(my_results[i].task.toLowerCase());
+								}
+								console.log(all_tasks);
+								console.log(user_tasks);
+
+								//use tfjs pre-trained word embeddings for document vectorization
+								encoder.load().then(model => {
+									const sentences = all_tasks;
+									model.embed(sentences).then(embeddings => {
+										console.log(embeddings);
+									})
+								});
+								res.json(results);
+							}
+						}
+					);
+				}
+			}
+		);
+	}
+	else{
+		res.send("You must log in to access this endpoint.")
+	}
+
+
 });
 
 
