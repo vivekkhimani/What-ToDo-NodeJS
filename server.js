@@ -333,7 +333,7 @@ app.get('/get_history',function(req,res,next){
 app.post('/delete_task',function(req,res,next){
 	if (req.session.loggedin){
 		const data = req;
-		const email = req.session.email;
+		const email = req.session.user_email;	//Typo, this needs to be user_email
 		const task = data.body.task;
 		connection.query(
 			"DELETE FROM `current` WHERE email='"+email+"'AND task='"+task+"'",
