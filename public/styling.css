@@ -63,3 +63,20 @@ h1 {
 #removeUser {
     display: none;
 }
+table{
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width:100%;
+}
+
+td{
+    border: 1px solid #ffffff;
+    text-align: left;
+    padding: 8px;
+}
+
+#history_div{
+    visibility: hidden;
+    margin-top: 10px;
+}
+
