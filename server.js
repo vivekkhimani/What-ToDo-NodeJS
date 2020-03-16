@@ -8,10 +8,12 @@ const session = require('express-session');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 const encoder = require('@tensorflow-models/universal-sentence-encoder');
+const similarity = require('compute-cosine-similarity');
 const path = require('path');
 require('dotenv').config();
 
 
+/*THESE ARE ALL THE FUNCTIONS USED INSIDE THE SERVER SIDE CODE */
 //generating salt for password hashing
 var genSalt = function(length){
 	return crypto.randomBytes(Math.ceil(length/2)).toString('hex').slice(0,length);
@@ -34,19 +36,32 @@ var sha512 = function(password,salt){
 	};
 };
 
-//a function for calculating cosine similarity
-var similarity = function(a,b){
-	const magnitudeA = Math.sqrt(this.dot(a,a));
-	const magnitudeB = Math.sqrt(this.dot(b,b));
+//a function that uses similarity function above to generate similarity dictionary
+var get_cosine_similarity_matrix = function(user_matrix,all_matrix){
+	//key = user_matrix_sentence_index, value = list(cosine_similarity_score) with all_matrix
+	var return_dict = {};
 
-	if (magnitudeA && magnitudeB){
-		return this.dot(a,b)/(magnitudeA * magnitudeB);
+	for (i=0;i<user_matrix.length;i++){
+		var local_user_matrix = [];
+		for (j=0;j<all_matrix.length;j++){
+			var s = similarity(user_matrix[i],all_matrix[j]);
+			local_user_matrix.push(s);
+		}
+		return_dict[i] = local_user_matrix;
 	}
-	else{
-		return false;
-	}
+	return return_dict;
 };
 
+//getting embeddings for a list of sentences
+var get_embeddings = async function(list_sentences){
+	const model = await encoder.load();
+	const embeddings = await model.embed(list_sentences);
+	const a = embeddings.arraySync();
+	return a;
+};
+
+
+/*ALL THE SERVER SIDE CODE AND ENDPOINTS BEGIN HERE*/
 
 //initiating server and app
 const app = express();
@@ -156,7 +171,7 @@ app.get('/check_user',function(req,res,next){
 			//user not found
 			else{
 				//error display logic to be handled at client
-				console.log("user not found.")
+				console.log("user not found.");
 				res.send(results);
 			}
 		}
@@ -188,7 +203,7 @@ app.get("/get_user_info", function(req, res) {
 				//user not found
 				else {
 					//error display logic to be handled at client
-					console.log("user not found.")
+					console.log("user not found.");
 					res.send(results);
 				}
 			}
@@ -219,7 +234,7 @@ app.get("/get_task",function(req, res, next){
 				//user not found
 				else {
 					//error display logic to be handled at client
-					console.log("user not found.")
+					console.log("user not found.");
 					res.send(results);
 				}
 			}
@@ -236,8 +251,7 @@ app.get("/temp",function(req,res,next){
 	connection.query(
 		//"SHOW CREATE TABLE `history`",
 		//"ALTER TABLE `history` DROP PRIMARY KEY",
-			//"ALTER TABLE `history` ADD uid INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT",
-		"DESCRIBE `history`",
+			"TRUNCATE TABLE `current`",
 		function(error,results,field){
 			if (error) throw error;
 			else{
@@ -363,6 +377,7 @@ app.post('/delete_task',function(req,res,next){
 	}
 });
 
+//an endpoint for getting recommendations using machine learning
 app.get('/get_custom_recommendations',function(req,res,next){
 	//get all the tasks FOR ALL USERS from history table using history database
 	//get all the tasks FOR CURRENTLY LOGGED IN user using history database
@@ -394,14 +409,32 @@ app.get('/get_custom_recommendations',function(req,res,next){
 								console.log(all_tasks);
 								console.log(user_tasks);
 
-								//use tfjs pre-trained word embeddings for document vectorization
-								encoder.load().then(model => {
-									const sentences = all_tasks;
-									model.embed(sentences).then(embeddings => {
-										console.log(embeddings);
-									})
+								const b = get_embeddings(all_tasks);
+
+								b.then(function(result){
+									const a = get_embeddings(user_tasks);
+									a.then(function(done){
+										const my_results = get_cosine_similarity_matrix(done,result);
+										//get the best results and send it
+										var return_list = [];
+										for (var key in my_results){
+											//key = index of user tasks; value = array of all tasks
+											for (k=0;k<my_results[key].length;k++) {
+												var return_object = {};
+												return_object["user_task"] = user_tasks[key];
+												return_object["recommended_task"] = all_tasks[k];
+												var sim = my_results[key][k];
+												sim = sim.toFixed(2);
+												sim = parseFloat(sim);
+												const percent = sim * 100;
+												return_object["similarity"] = percent;
+												return_list.push(return_object);
+											}
+										}
+										console.log(JSON.stringify(return_list,null,4));
+										res.json(return_list);
+									});
 								});
-								res.json(results);
 							}
 						}
 					);
