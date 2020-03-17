@@ -175,7 +175,7 @@ function alternative(taskJson){
             dc = data_row.insertCell(td_count);
             if (td_count==0){
                 var id_val = "check_input"+i;                               //id is check_input instead of task
-                dc.innerHTML = "<input type='checkbox' id='"+ id_val +"' name='"+ taskJson[i].task +"'>";
+                dc.innerHTML = "<input type='checkbox' id='"+ id_val +"' name='"+ JSON.stringify(taskJson[i]) +"'>";   //Make this full JSON structure
             }
             else if(td_count==1){
                 dc.innerHTML = taskJson[i].task;
@@ -365,11 +365,11 @@ function alternativeValidation() {
         for (j=0; j < checkbox.length; j++) {
 
             if (checkbox[j].checked) {
-                taskName = checkbox[j].name;
-                console.log("Remove " + taskName);
+                taskName = JSON.parse(checkbox[j].name);
+                console.log("Remove " + taskName.task);
 
                 var send_data = {};
-                    send_data.task = taskName;
+                    send_data.task = taskName.task;
 
                 $.ajax({
                     url: 'http://localhost:3000/delete_task',
