@@ -22,12 +22,15 @@
     "@tensorflow-models/universal-sentence-encoder": "^1.2.2",
     "@tensorflow/tfjs": "^1.7.0",
     "@tensorflow/tfjs-node": "^1.7.0",
+    "compute-cosine-similarity": "^1.0.0",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "mathjs": "^6.6.1",
     "mysql": "^2.18.1",
     "path": "^0.12.7",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "sleep": "^6.1.0"
   }
 }
