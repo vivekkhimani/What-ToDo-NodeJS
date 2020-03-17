@@ -103,7 +103,7 @@ function requestTasks() {
             let json = JSON.parse(xhttp.responseText);
             //let userInfo = json[0];
             console.log(json);
-            formatTasks(json);
+            //formatTasks(json);
             //call for vivek's alternative display
             alternative(json);
             //interval that updates timer.
@@ -136,14 +136,17 @@ function produceTimer(dueDate){
 
 //alternative display method with timer for tasks
 function alternative(taskJson){
-    var taskDiv = document.getElementById("alternative_tasks");
+    //var taskDiv = document.getElementById("alternative_tasks");
+    var taskDiv = document.getElementById("taskDiv");
 
     const h3_tag = document.createElement("h3");
-    h3_tag.appendChild(document.createTextNode("Here's an alternative display of todo list"));
+    h3_tag.appendChild(document.createTextNode("Here's what's on your list:"));
     taskDiv.appendChild(h3_tag);
 
     const br1_init = document.createElement("br");
     taskDiv.appendChild(br1_init);
+    const br2_init = document.createElement("br");
+    taskDiv.appendChild(br2_init);
 
     const display_table = document.createElement("table");
     const header_row = display_table.insertRow(0);
@@ -171,8 +174,8 @@ function alternative(taskJson){
         while(td_count<6){
             dc = data_row.insertCell(td_count);
             if (td_count==0){
-                var id_val = "check_input"+i;
-                dc.innerHTML = "<input type='checkbox' id='"+id_val+"'>";
+                var id_val = "check_input"+i;                               //id is check_input instead of task
+                dc.innerHTML = "<input type='checkbox' id='"+ id_val +"' name='"+ taskJson[i].task +"'>";
             }
             else if(td_count==1){
                 dc.innerHTML = taskJson[i].task;
@@ -181,12 +184,22 @@ function alternative(taskJson){
                 dc.innerHTML = taskJson[i].priority;
             }
             else if(td_count==3){
-                var date_time_list = taskJson[i].due_date.split("T");
-                dc.innerHTML = date_time_list[0];
+                date = new Date(taskJson[i].due_date);
+                formatDate = (date.getMonth()+1) + '-' + date.getDate() + "-" + date.getFullYear();
+                dc.innerHTML = formatDate;
+                //var date_time_list = taskJson[i].due_date.split("T");
+                //dc.innerHTML = date_time_list[0];
             }
             else if(td_count==4){
-                var date_time_list1 = taskJson[i].due_date.split("T");
-                dc.innerHTML = date_time_list1[1];
+                var hours = date.getHours() > 12 ? date.getHours() - 12 : date.getHours();
+                var am_pm = date.getHours() >= 12 ? "PM" : "AM";
+                hours = hours < 10 ? "0" + hours : hours;
+                var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+                var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+                formatTime = hours + ":" + minutes + ":" + seconds + " " + am_pm;
+                dc.innerHTML = formatTime;
+                //var date_time_list1 = taskJson[i].due_date.split("T");
+                //dc.innerHTML = date_time_list1[1];
             }
             else if(td_count==5){
                 var timer_id = "timer"+i;
@@ -199,6 +212,26 @@ function alternative(taskJson){
         taskDiv.appendChild(display_table);
         taskDiv.appendChild(br1_init);
     }
+    //Building submit button for form
+    const but_init = document.createElement("input");
+    
+    var butIdAtt = document.createAttribute("id");
+    butIdAtt.value = "completeBtn";
+    but_init.setAttributeNode(butIdAtt);
+    
+    var butClassAtt = document.createAttribute("class");
+    butClassAtt.value = "btn btn-outline-info";
+    but_init.setAttributeNode(butClassAtt);
+    
+    var butTypeAtt = document.createAttribute("type");
+    butTypeAtt.value = "submit";
+    but_init.setAttributeNode(butTypeAtt);
+    
+    var butValueAtt = document.createAttribute("value");
+    butValueAtt.value = "Complete!";
+    but_init.setAttributeNode(butValueAtt);
+    taskDiv.appendChild(but_init);
+
 }
 
 //function to call for timer activation every second
@@ -235,7 +268,7 @@ function updateTimer(taskJson){
 }
 
 function formatTasks(taskJson) {
-    taskDiv = document.getElementById("taskDiv");
+    /*taskDiv = document.getElementById("taskDiv");
     taskDiv.innerHTML = "";
 
     //Creating header tag
@@ -263,9 +296,9 @@ function formatTasks(taskJson) {
         inputNameAtt.value = JSON.stringify(taskJson[i].task);
         input_init.setAttributeNode(inputNameAtt);  //inputNameAtt.value = JSON.stringify(taskJson[i]);
 
-        /*var class1Att = document.createAttribute("class");
-        class1Att.value = "custom-control-input";
-        input_init.setAttributeNode(class1Att);*/
+        //var class1Att = document.createAttribute("class");
+        //class1Att.value = "custom-control-input";
+        //input_init.setAttributeNode(class1Att);
         taskDiv.appendChild(input_init);
 
         //Formatting the date
@@ -289,9 +322,9 @@ function formatTasks(taskJson) {
         forAtt.value = "task" + i;
         label_init.setAttributeNode(forAtt);
 
-        /*var class2Att = document.createAttribute("class");
-        class2Att.value = "custom-control-label";
-        label_init.setAttributeNode(class2Att);*/
+        //var class2Att = document.createAttribute("class");
+        //class2Att.value = "custom-control-label";
+        //label_init.setAttributeNode(class2Att);
 
         label_init.appendChild(document.createTextNode(taskJson[i].task + ", due on " + formatDate + " at " + formatTime ));
         taskDiv.appendChild(label_init);
@@ -320,12 +353,48 @@ function formatTasks(taskJson) {
     butValueAtt.value = "Complete!";
     but_init.setAttributeNode(butValueAtt);
     taskDiv.appendChild(but_init);
+*/
+}
+
+function alternativeValidation() {
+    var rows = document.getElementsByTagName('tr');
+    
+    for(var i=0;i<rows.length;i++) {
+        var checkbox=rows[i].getElementsByTagName("input");  
+
+        for (j=0; j < checkbox.length; j++) {
+
+            if (checkbox[j].checked) {
+                taskName = checkbox[j].name;
+                console.log("Remove " + taskName);
+
+                var send_data = {};
+                    send_data.task = taskName;
+
+                $.ajax({
+                    url: 'http://localhost:3000/delete_task',
+                    type: 'POST',
+                    data: send_data,
+                    success: function(msg){
+                        console.log(JSON.stringify(send_data));
+                        window.location.href = "http://localhost:3000/";
+                    },
+                    error: function(jqXHR,status,err){
+                        console.log(status);
+                        console.log(err);
+                    }
+                });
+            }
+        }
+
+    }
 }
 
 function validateForm() {
 
         $.each($("input:checked"), function(){
             console.log($(this).prop("name"));
+            console.log("here");
             
             let taskName = JSON.parse($(this).prop("name"));
 
