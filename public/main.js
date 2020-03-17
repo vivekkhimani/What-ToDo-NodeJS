@@ -134,7 +134,7 @@ function formatTasks(taskJson) {
 
         var inputNameAtt = document.createAttribute("name");
         inputNameAtt.value = JSON.stringify(taskJson[i].task);
-        input_init.setAttributeNode(inputNameAtt);
+        input_init.setAttributeNode(inputNameAtt);  //inputNameAtt.value = JSON.stringify(taskJson[i]);
 
         /*var class1Att = document.createAttribute("class");
         class1Att.value = "custom-control-input";
@@ -201,7 +201,7 @@ function validateForm() {
             let taskName = JSON.parse($(this).prop("name"));
 
             var send_data = {};
-                send_data.task = taskName;
+                send_data.task = taskName;  //.task;
 
             $.ajax({
                 url: 'http://localhost:3000/delete_task',
