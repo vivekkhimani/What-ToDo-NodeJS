@@ -25,8 +25,10 @@ function addTask() {
     //taskErrors is the id for add task error field
     if (checkInfo(task, dueDate, "taskErrors") === true) {          
 
+        console.log(dueDate)
         dueDate = dueDate.replace("T", " ")
         dueDate += ":00";
+        console.log(dueDate)
 
         priority = parseInt(priority);
 
@@ -244,7 +246,17 @@ function alternative(taskJson){
             
             //Priority
             else if(td_count==2){
-                dc.innerHTML = taskJson[i].priority;
+                num = taskJson[i].priority;
+                if (num === 1) {
+                    dc.innerHTML = '<b style="color:#17a2b7">!!!</b>';
+                }
+                else if (num === 2) {
+                    dc.innerHTML = '<b style="color:#17a2b7">!!</b>';
+                }
+                else {
+                    dc.innerHTML = '<b style="color:#17a2b7">!</b>';
+                }
+                //dc.innerHTML = taskJson[i].priority;
             }
             
             //Formats date as: MM-DD-YYYY
@@ -304,6 +316,7 @@ function alternative(taskJson){
 
     $form.click('submit', function(event){              
         event.preventDefault();
+        modalHander()
     });
     
 }
@@ -338,7 +351,58 @@ function updateTimer(taskJson){
         else if (produce[1] < 1){
             document.getElementById(timer_id).style.color = "red";
         }
+
     }
+}
+
+function modalHander() {
+    
+    var rows = document.getElementsByTagName('tr');
+    onlyOne = false;
+
+    for(var i=0;i<rows.length;i++) {
+        var checkbox=rows[i].getElementsByTagName("input");  
+
+        //For every input tag found in the tr, 
+        for (j=0; j < checkbox.length; j++) {
+
+            if (checkbox[j].checked) {
+
+                if (onlyOne === true) {
+                    console.log("Can only edit one task at a time");
+                    break;
+                }
+
+                //Otherwise, the first checkbox has been found
+                onlyOne = true;
+
+                if (checkbox[j].checked) {
+                    fullTask = JSON.parse(checkbox[j].name);
+                    
+                    //Preset text value to task name
+                    document.getElementById("modalTask").value = fullTask.task;
+                    
+                    //Preset date to due_date
+                    //Need to reformat date from YYYY-MM-DDTHH:MM:SS.000Z to YYYY-MM-DDTHH:MM
+                    //Keep in mind, dates are stored according to UTC time (so 4 hours ahead)
+                    date = new Date(fullTask.due_date);
+                    var hours = date.getHours() > 12 ? date.getHours() - 12 : date.getHours();
+                    var am_pm = date.getHours() >= 12 ? "PM" : "AM";
+                    hours = hours < 10 ? "0" + hours : hours;
+                    var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+                    var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+                    formatTime = hours + ":" + minutes;
+                    
+                    sp = fullTask.due_date.split("T");
+                    formatDate = sp[0] + "T" + formatTime;
+                    console.log(formatDate);
+                    document.getElementById("modalDueDate").value = formatDate;
+                    
+                }
+            }
+        }
+    }
+
 }
 
 //Click handler for modal Save Changes button
@@ -398,7 +462,6 @@ function updateTask() {
                         send_data.newPriority = priority;
                         console.log(send_data);
 
-                    /* Will be commented back in when endpoint is created*/
                     $.ajax({
                         url: 'http://localhost:3000/edit_task',
                         type: 'POST',
