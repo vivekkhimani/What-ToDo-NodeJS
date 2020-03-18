@@ -271,7 +271,8 @@ app.get('/main',function(req,res,next){
 		res.sendFile(path.join(__dirname,'public','main.html'));
 	}
 	else{
-		res.send("You need to login to access this page.");
+		//res.send("You need to login to access tyhis page.");
+		res.redirect('/');
 	}
 });
 
