@@ -271,7 +271,8 @@ app.get('/main',function(req,res,next){
 		res.sendFile(path.join(__dirname,'public','main.html'));
 	}
 	else{
-		res.send("You need to login to access this page.");
+		//res.send("You need to login to access tyhis page.");
+		res.redirect('/');
 	}
 });
 
@@ -282,7 +283,7 @@ app.get('/signout',function(req,res,next){
 	req.session.user_email = null;
 	req.session.first_name = null;
 	req.session.last_name = null;
-	res.redirect("/");
+	res.redirect("/"); // redirects to login after signout
 });
 
 //an endpoint that will edit the task in the database
@@ -364,6 +365,17 @@ app.post('/remove_db',function(req,res,next){
 			   }
 			   else{
 				  console.log("user deleted");
+				  connection.query(
+					"DELETE from `current` WHERE email='"+user_email+"'",
+						function(error,results,fields){
+							if (error){
+								throw error;
+							}
+							else{
+								console.log("current tasks deleted")
+							}
+						}
+				  )
 				  res.redirect("/");
 			   }
 			});
