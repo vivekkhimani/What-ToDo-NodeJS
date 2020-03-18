@@ -364,6 +364,17 @@ app.post('/remove_db',function(req,res,next){
 			   }
 			   else{
 				  console.log("user deleted");
+				  connection.query(
+					"DELETE from `current` WHERE email='"+user_email+"'",
+						function(error,results,fields){
+							if (error){
+								throw error;
+							}
+							else{
+								console.log("current tasks deleted")
+							}
+						}
+				  )
 				  res.redirect("/");
 			   }
 			});
