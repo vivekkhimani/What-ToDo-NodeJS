@@ -198,6 +198,9 @@ function alternative(taskJson){
 
     const h3_tag = document.createElement("h3");
     h3_tag.appendChild(document.createTextNode("Here's what's on your list:"));
+    var h3Sty= document.createAttribute("style");
+    h3Sty.value = "margin-left:5px";
+    h3_tag.setAttributeNode(h3Sty);
     taskDiv.appendChild(h3_tag);
 
     const br1_init = document.createElement("br");
@@ -296,7 +299,7 @@ function alternative(taskJson){
     //Complete! form submission button
     //Triggers alternativeValidation() function
     var completeBtn = document.createElement('input');
-    completeBtn.innerHTML = '<input id="completeBtn" class="btn btn-outline-info" type="submit" value="Complete!">'
+    completeBtn.innerHTML = '<input id="completeBtn" style="margin-left:5px" class="btn btn-outline-info" type="submit" value="Complete!">'
 
     while(completeBtn.firstChild) {
         taskDiv.appendChild(completeBtn.firstChild);

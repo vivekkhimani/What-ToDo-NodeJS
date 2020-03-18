@@ -40,11 +40,11 @@
 		<h1 style="text-align:center" class="display-5" id="userInfo" ></h1>
 		
 		<!--REMOVE USER FIELDS-->
-		<div id="removeUser">
+		<div id="removeUser" style="margin-left:5px">
 			<label for="email">Enter email to delete account</label> 
 			<input type="text" id="email" required>
 
-			<button id="removeBtn">Confirm Deletion</button>
+			<button id="removeBtn" class="btn btn-outline-info">Confirm Deletion</button>
 			<p id="p2"></p>
 		</div>
 		<p id="removalError"></p>
@@ -62,15 +62,15 @@
 		
 		<!--ADD TASK FIELDS-->
 		<div>
-			<h3>Add task</h3>
+			<h3 style="margin-left:5px">Add task</h3>
 
-			<label for="task">Task: </label> 
+			<label for="task" style="margin-left:5px">Task: </label> 
 			<input type="text" id="task" required>
 			<br>
-			<label for="dueDate">Due date:</label>
+			<label for="dueDate" style="margin-left:5px">Due date:</label>
 			<input type="datetime-local" id="dueDate">
 			<br>
-			<label for="priority">Priority:</label>
+			<label for="priority" style="margin-left:5px">Priority:</label>
 			<select id="priority">
 				<option value="1">1</option>
 				<option value="2">2</option>
@@ -78,7 +78,7 @@
 			  </select>
 		</div>
 
-		<button id="addTaskBtn" class="btn btn-outline-info">Add task</button>
+		<button id="addTaskBtn" class="btn btn-outline-info" style="margin-left:5px">Add task</button>
 		<p id="taskErrors" style="color:red"></p>
 
 		<!--MODAL FOR UPDATING TASKS -->
@@ -119,7 +119,7 @@
 
 		<!-- Recommendations Display-->
 		<div>
-			<h3>Recommended Tasks</h3>
+			<h3 style="margin-left:5px">Recommended Tasks</h3>
 			<div id="history_div"></div>
 		</div>
 	</body>
