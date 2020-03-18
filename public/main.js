@@ -329,10 +329,10 @@ function updateTimer(taskJson){
             continue;
         }
         document.getElementById(timer_id).innerHTML = produce[1].toString() + "d " + produce[2].toString() + "h "+ produce[3].toString() + "m";
-        if (produce[1]>3){
+        if (produce[1]>=3){
             document.getElementById(timer_id).style.color = "green";
         }
-        else if (produce[1]<3 && produce[1]>1){
+        else if (produce[1]<3 && produce[1]>=1){
             document.getElementById(timer_id).style.color = "orange";
         }
         else if (produce[1] < 1){
@@ -398,9 +398,9 @@ function updateTask() {
                         send_data.newPriority = priority;
                         console.log(send_data);
 
-                    /* Will be commented back in when endpoint is created
+                    /* Will be commented back in when endpoint is created*/
                     $.ajax({
-                        url: 'http://localhost:3000/update_task',
+                        url: 'http://localhost:3000/edit_task',
                         type: 'POST',
                         data: send_data,
                         success: function(msg){
@@ -412,7 +412,7 @@ function updateTask() {
                             console.log(err);
                         }
                     });
-                    */
+
                 }
             }
 
@@ -497,8 +497,9 @@ async function getHistoryML(){
             await resp;
             sessionStorage.setItem("hist",JSON.stringify(resp));
             if (sessionStorage.hist){
-                location.reload();
+                //location.reload();
                 //console.log(sessionStorage.hist);
+                displayHistory(sessionStorage.hist);
             }
 
         },
@@ -519,17 +520,17 @@ function displayHistory(histObject){
     });
     var historyDiv = document.getElementById("history_div");
     historyDiv.style.visibility = "visible";
-    var display_table = document.createElement("TABLE");
-    var header_row = display_table.insertRow(0);
+    var display_list = document.createElement("ul");
+    //var header_row = display_table.insertRow(0);
 
     //populate the first row
-    var cell1 = header_row.insertCell(0);
-    var cell2 = header_row.insertCell(1);
-    var cell3 = header_row.insertCell(2);
+    //var cell1 = header_row.insertCell(0);
+    //var cell2 = header_row.insertCell(1);
+    //var cell3 = header_row.insertCell(2);
 
-    cell1.innerHTML = "<b>Recommended Task</b>";
-    cell2.innerHTML = "<b>Base Task</b>";
-    cell3.innerHTML = "<b>Similarity (%)</b>";
+    //cell1.innerHTML = "<b>Recommended Task</b>";
+    //cell2.innerHTML = "<b>Base Task</b>";
+    //cell3.innerHTML = "<b>Similarity (%)</b>";
 
     //display top 10 similar tasks
     var i = 0;
@@ -537,10 +538,11 @@ function displayHistory(histObject){
     var td_count;
     var data_row,dc;
     while(i<10){
+        /*
         td_count = 0;
-        data_row = display_table.insertRow(row);
+        //data_row = display_table.insertRow(row);
         while(td_count<3){
-            dc = data_row.insertCell(td_count);
+            //dc = data_row.insertCell(td_count);
             if (td_count == 0){
                 //recommended
                 dc.innerHTML = histArray[i].recommended_task;
@@ -556,10 +558,14 @@ function displayHistory(histObject){
             td_count++;
             continue;
         }
+        */
+        const listItem = document.createElement('li');
+        listItem.innerHTML = histArray[i].recommended_task;
+        display_list.append(listItem);
         i++;
         row++;
     }
-    historyDiv.appendChild(display_table);
+    historyDiv.appendChild(display_list);
 }
 
 

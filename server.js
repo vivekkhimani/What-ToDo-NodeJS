@@ -285,8 +285,63 @@ app.get('/signout',function(req,res,next){
 	res.redirect("/");
 });
 
-//db post endpoint for deleting your account. create a button on user homepage and bind this endpoint with it.
+//an endpoint that will edit the task in the database
+app.post("/edit_task",function(req,res,next){
+	if (req.session.loggedin){
+	const data = req;
+	const user_email = req.session.user_email;
+	const old_task = data.body.oldTask;
+	const old_due_date = data.body.oldDueDate;
+	const old_priority = data.body.oldPriority;
+	const new_task = data.body.newtask;
+	const new_due_date = data.body.newDueDate;
+	const new_priority = data.body.newPriority;
 
+	connection.query(
+		"UPDATE`current` SET task='"+new_task+"',priority='"+new_priority+"',due_date='"+new_due_date+"' WHERE email='"+user_email+"' AND task='"+old_task+"'",
+		function(error,results,fields){
+			if (error) throw error;
+			else{
+					connection.query(
+						"SELECT * FROM `history` WHERE email='"+user_email+"' AND task='"+new_task+"'",
+						function(error,results,fields){
+							if (error) throw error;
+							else{
+								console.log(results);
+								if (results[0]){
+									connection.query(
+										"UPDATE `history` SET counter = counter + 1 WHERE email='"+user_email+"' AND task='"+new_task+"'",
+										function (error,results,fields) {
+											if (error) throw error;
+											else{
+												console.log("task found in history.counter increased.");
+												res.status(200).send("Task edited.");
+											}
+										}
+									);
+								}
+								else {
+									connection.query(
+										"INSERT INTO `history` (email,task,counter) VALUES('"+user_email+"','"+new_task+"',1)",
+										function (error,results,fields) {
+											if (error) throw error;
+											else{
+												console.log("task not found in history.now added.");
+												res.status(200).send("Task edited.");
+											}
+										}
+									);
+								}
+							}
+						}
+					);
+			}
+		}
+	);
+}
+});
+
+//db post endpoint for deleting your account. create a button on user homepage and bind this endpoint with it.
 app.post('/remove_db',function(req,res,next){
 	const data = req;
 	const user_email = data.body.email;
