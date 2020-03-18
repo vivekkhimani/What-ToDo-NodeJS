@@ -283,7 +283,7 @@ app.get('/signout',function(req,res,next){
 	req.session.user_email = null;
 	req.session.first_name = null;
 	req.session.last_name = null;
-	res.redirect("/");
+	res.redirect("/"); // redirects to login after signout
 });
 
 //an endpoint that will edit the task in the database
