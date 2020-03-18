@@ -395,8 +395,9 @@ function modalHander() {
                     
                     sp = fullTask.due_date.split("T");
                     formatDate = sp[0] + "T" + formatTime;
-                    console.log(formatDate);
                     document.getElementById("modalDueDate").value = formatDate;
+                    
+                    document.getElementById("modalPriority").selectedIndex = fullTask.priority - 1;
                     
                 }
             }
