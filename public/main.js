@@ -228,7 +228,23 @@ function alternative(taskJson){
     var row = 1;
     var td_count;
     var data_row,dc;
+    
+    if (taskJson.length == 0) {
+        const emptyTxt = document.createElement("h5");
+        emptyTxt.appendChild(document.createTextNode("Your list is empty at the moment. Add a task in the fields below!"));
+        var emptySty= document.createAttribute("style");
+        emptySty.value = "margin-left:20px";
+        emptyTxt.setAttributeNode(emptySty);
+        taskDiv.appendChild(emptyTxt);
+
+        const br3_init = document.createElement("br");
+        taskDiv.appendChild(br3_init);
+        const br4_init = document.createElement("br");
+        taskDiv.appendChild(br4_init);
+    }
+
     for (i=0;i<taskJson.length;i++){
+
         td_count = 0;
         data_row = display_table.insertRow(row);
         
