@@ -16,6 +16,7 @@
 	</head>
 
 	<body>
+		<!--NAV BAR-->
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
 			<a class="navbar-brand" >What To-Do?</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +35,11 @@
 			</div>
 		  </nav>
 
-	
-		<!--<h5>Usage Instructions:</h5>-->
 		<br>
+		<!-- WELCOME USER HEADER-->
 		<h1 style="text-align:center" class="display-5" id="userInfo" ></h1>
 		
+		<!--REMOVE USER FIELDS-->
 		<div id="removeUser">
 			<label for="email">Enter email to delete account</label> 
 			<input type="text" id="email" required>
@@ -48,6 +49,7 @@
 		</div>
 		<p id="removalError"></p>
 
+
 		<!--ALTERNATIVE WITH TIMER-->
 		<div id="alternative_tasks">
 			<form id="taskDiv" onsubmit="return alternativeValidation()">
@@ -55,14 +57,10 @@
 			</form>
 		</div>
 
-		<!--class="custom-control custom-checkbox"-->
-		<!--<form id="taskDiv" onsubmit="return validateForm()">-->
-			<!--Tasks to be inserted here-->
-		<!--</form>-->
-
 		<br>
 		<br>
 		
+		<!--ADD TASK FIELDS-->
 		<div>
 			<h3>Add task</h3>
 
@@ -81,26 +79,36 @@
 		</div>
 
 		<button id="addTaskBtn" class="btn btn-outline-info">Add task</button>
-		<p id="taskErrors"></p>
+		<p id="taskErrors" style="color:red"></p>
 
-		<br>
-		<br>
-
-		<div class="modal" tabindex="-1" role="dialog">
+		<!--MODAL FOR UPDATING TASKS -->
+		<div id="myModal" class="modal" tabindex="-1" role="dialog">
 			<div class="modal-dialog" role="document">
 			  <div class="modal-content">
 				<div class="modal-header">
-				  <h5 class="modal-title">Modal title</h5>
+				  <h5 class="modal-title">Edit Task</h5>
 				  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				  </button>
 				</div>
 				<div class="modal-body">
-				  <p>Modal body text goes here.</p>
+					<label for="modalTask" >Task: </label> 
+					<input type="text" id="modalTask" value = "" required>
+					<br>
+					<label for="modalDueDate" >Due date:</label>
+					<input type="datetime-local" id="modalDueDate" value="">	<!--value = "2020-03-18T15:00"-->
+					<br>
+					<label for="modalPriority">Priority:</label>
+					<select id="modalPriority">
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3" >3</option>		<!--selected-->
+					  </select>
+					<p id="modalErrors" style="color:red"></p>
 				</div>
 				<div class="modal-footer">
-				  <button type="button" class="btn btn-primary">Save changes</button>
-				  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				  <button id = "saveChanges" type="button" class="btn btn-outline-info">Save changes</button>
+				  <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
 				</div>
 			  </div>
 			</div>

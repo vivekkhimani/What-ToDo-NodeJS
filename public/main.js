@@ -3,6 +3,8 @@ window.onload = function() {
     document.getElementById("showRemoveBtn").addEventListener("click", showRemoveBtn);
     document.getElementById("removeBtn").addEventListener("click", removeUser);
     document.getElementById("addTaskBtn").addEventListener("click", addTask);
+    document.getElementById("saveChanges").addEventListener("click", updateTask);       //Listener for modal 'Save Changes' button
+
     requestData();
     requestTasks();
     if (sessionStorage.hist == null) {
@@ -18,40 +20,93 @@ function addTask() {
     var task = document.getElementById("task").value;
     var dueDate = document.getElementById("dueDate").value
     var priority = document.getElementById("priority").value;
-    var taskErrors = document.getElementById("taskErrors");
-    taskErrors.innerHTML = "";
+    
+    //Check info returns true if task is not empty and due date was entered and has not passed
+    //taskErrors is the id for add task error field
+    if (checkInfo(task, dueDate, "taskErrors") === true) {          
 
-    var taskErrors = document.getElementById("taskErrors");
-    if (task.length < 1) {
-        taskErrors.innerHTML = "Enter a task or your account will be deleted";
+        dueDate = dueDate.replace("T", " ")
+        dueDate += ":00";
+
+        priority = parseInt(priority);
+
+        var send_data = {};
+        send_data.task = task;
+        send_data.dueDate = dueDate;
+        send_data.priority = priority;
+
+        $.ajax({
+            url: 'http://localhost:3000/add_task',
+            type: 'POST',
+            data: send_data,
+            success: function(msg){
+                console.log(JSON.stringify(send_data));
+                window.location.href = "http://localhost:3000/";
+            },
+            error: function(jqXHR,status,err){
+                console.log(status);
+                console.log(err);
+            }
+        });
+        sessionStorage.removeItem('hist');
+        getHistoryML();
+    }
+}
+
+//Takes task name, due date, and the id of the error field
+function checkInfo(taskName, dueDate, errFieldID) {
+    taskNameGood = true;
+    dueDateGood = true;
+
+    //Locates error field
+    var errList = document.getElementById(errFieldID);
+    errList.style.display = "none";
+
+    //Remove any pre-existing errors
+    while (errList.hasChildNodes()) {
+		errList.removeChild(errList.firstChild)
+	}
+	
+	newUl = document.createElement("ul");
+	errList.appendChild(newUl);
+
+    //Error: Task was not entered
+    if (taskName.length < 1) {
+        taskNameGood = false;
+        newLi = document.createElement("li");
+		newLi.appendChild(document.createTextNode("Task field left empty"));
+        newUl.appendChild(newLi);
+    }
+    
+    var inputDate = new Date(dueDate)
+    var today = new Date();
+
+    //Error: Due date was not entered
+    if (dueDate === "") {
+        dueDateGood = false;
+        newLi = document.createElement("li");
+		newLi.appendChild(document.createTextNode("Due date invalid"));
+        newUl.appendChild(newLi);
     }
 
-    dueDate = dueDate.replace("T", " ")
-    dueDate += ":00";
+    //Error: Due date has passed
+    if (inputDate.getTime() < today.getTime()) {
+        dueDateGood = false;
+        newLi = document.createElement("li");
+		newLi.appendChild(document.createTextNode("Due date has passed"));
+        newUl.appendChild(newLi);
+    }
 
-    priority = parseInt(priority);
-
-    var send_data = {};
-    send_data.task = task;
-    send_data.dueDate = dueDate;
-    send_data.priority = priority;
-
-    $.ajax({
-        url: 'http://localhost:3000/add_task',
-        type: 'POST',
-        data: send_data,
-        success: function(msg){
-            console.log(JSON.stringify(send_data));
-            window.location.href = "http://localhost:3000/";
-        },
-        error: function(jqXHR,status,err){
-            console.log(status);
-            console.log(err);
-        }
-    });
-    sessionStorage.removeItem('hist');
-    getHistoryML();
+    //If everything is good, return true
+    //Else, make the error list visible and return false
+    if ((taskNameGood == true) && (dueDateGood == true)) {
+        return true;
+    } else {
+        errList.style.display = "block";
+        return false;
+    }
 }
+
 
 function signoutUser(event) {
     $.ajax({
@@ -171,25 +226,37 @@ function alternative(taskJson){
     for (i=0;i<taskJson.length;i++){
         td_count = 0;
         data_row = display_table.insertRow(row);
+        
         while(td_count<6){
             dc = data_row.insertCell(td_count);
+            
+            //Checkbox
+            //Note: name attr hold entire JSON structure for parsing in later functions
             if (td_count==0){
-                var id_val = "check_input"+i;                               //id is check_input instead of task
-                dc.innerHTML = "<input type='checkbox' id='"+ id_val +"' name='"+ JSON.stringify(taskJson[i]) +"'>";   //Make this full JSON structure
+                var id_val = "check_input"+i;                               
+                dc.innerHTML = "<input type='checkbox' id='"+ id_val +"' name='"+ JSON.stringify(taskJson[i]) +"'>";
             }
+
+            //Task name
             else if(td_count==1){
                 dc.innerHTML = taskJson[i].task;
             }
+            
+            //Priority
             else if(td_count==2){
                 dc.innerHTML = taskJson[i].priority;
             }
+            
+            //Formats date as: MM-DD-YYYY
             else if(td_count==3){
                 date = new Date(taskJson[i].due_date);
                 formatDate = (date.getMonth()+1) + '-' + date.getDate() + "-" + date.getFullYear();
                 dc.innerHTML = formatDate;
-                //var date_time_list = taskJson[i].due_date.split("T");
+                //var date_time_list = taskJson[i].due_date.split("T");     //Vivek: this is old, just left in case you want it
                 //dc.innerHTML = date_time_list[0];
             }
+
+            //Formats time
             else if(td_count==4){
                 var hours = date.getHours() > 12 ? date.getHours() - 12 : date.getHours();
                 var am_pm = date.getHours() >= 12 ? "PM" : "AM";
@@ -198,9 +265,11 @@ function alternative(taskJson){
                 var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
                 formatTime = hours + ":" + minutes + ":" + seconds + " " + am_pm;
                 dc.innerHTML = formatTime;
-                //var date_time_list1 = taskJson[i].due_date.split("T");
+                //var date_time_list1 = taskJson[i].due_date.split("T");    //Also old
                 //dc.innerHTML = date_time_list1[1];
             }
+
+            //Timer
             else if(td_count==5){
                 var timer_id = "timer"+i;
                 console.log(timer_id);
@@ -212,26 +281,31 @@ function alternative(taskJson){
         taskDiv.appendChild(display_table);
         taskDiv.appendChild(br1_init);
     }
-    //Building submit button for form
-    const but_init = document.createElement("input");
-    
-    var butIdAtt = document.createAttribute("id");
-    butIdAtt.value = "completeBtn";
-    but_init.setAttributeNode(butIdAtt);
-    
-    var butClassAtt = document.createAttribute("class");
-    butClassAtt.value = "btn btn-outline-info";
-    but_init.setAttributeNode(butClassAtt);
-    
-    var butTypeAtt = document.createAttribute("type");
-    butTypeAtt.value = "submit";
-    but_init.setAttributeNode(butTypeAtt);
-    
-    var butValueAtt = document.createAttribute("value");
-    butValueAtt.value = "Complete!";
-    but_init.setAttributeNode(butValueAtt);
-    taskDiv.appendChild(but_init);
+    //Complete! form submission button
+    //Triggers alternativeValidation() function
+    var completeBtn = document.createElement('input');
+    completeBtn.innerHTML = '<input id="completeBtn" class="btn btn-outline-info" type="submit" value="Complete!">'
 
+    while(completeBtn.firstChild) {
+        taskDiv.appendChild(completeBtn.firstChild);
+    }
+
+    //Edit button
+    //Makes modal appear. Only here because it makes sense for the complete and edit buttons to be side by side
+    var editBtn = document.createElement('button');
+    editBtn.innerHTML = '<button type="button" id="modalBtn" style="margin-left:5px" class="btn btn-outline-info" data-toggle="modal" data-target="#myModal">Edit</button>'
+
+    while(editBtn.firstChild) {
+        taskDiv.appendChild(editBtn.firstChild);
+    }
+    
+    //Needed so Edit button doesn't trigger form validation func 
+    $form = $('#modalBtn');
+
+    $form.click('submit', function(event){              
+        event.preventDefault();
+    });
+    
 }
 
 //function to call for timer activation every second
@@ -267,110 +341,109 @@ function updateTimer(taskJson){
     }
 }
 
-function formatTasks(taskJson) {
-    /*taskDiv = document.getElementById("taskDiv");
-    taskDiv.innerHTML = "";
+//Click handler for modal Save Changes button
+//Sends request to server to update changes user makes
+function updateTask() {
+    //Fields user changed
+    var taskText = document.getElementById("modalTask").value;
+    var dueDate = document.getElementById("modalDueDate").value
+    var priority = document.getElementById("modalPriority").value;
 
-    //Creating header tag
-    const h3_init = document.createElement("h3");
-    h3_init.appendChild(document.createTextNode("Here's what's on your list:"));
-    taskDiv.appendChild(h3_init);
-
-    //br tag
-    const br1_init = document.createElement("br");
-    taskDiv.appendChild(br1_init);
+    //Uses same checkInfo func as addTask
+    //When true, request will be sent
+    if (checkInfo(taskText, dueDate, "modalErrors") === true) {
     
-    for (i=0; i<taskJson.length; i++) {
-        //Building input tag
-        const input_init = document.createElement("input");
+        dueDate = dueDate.replace("T", " ")
+        dueDate += ":00";
 
-        var typeAtt = document.createAttribute("type");
-        typeAtt.value = "checkbox";
-        input_init.setAttributeNode(typeAtt);
+        priority = parseInt(priority);
 
-        var inputIdAtt = document.createAttribute("id");
-        inputIdAtt.value = "task" + i;
-        input_init.setAttributeNode(inputIdAtt);
-
-        var inputNameAtt = document.createAttribute("name");
-        inputNameAtt.value = JSON.stringify(taskJson[i].task);
-        input_init.setAttributeNode(inputNameAtt);  //inputNameAtt.value = JSON.stringify(taskJson[i]);
-
-        //var class1Att = document.createAttribute("class");
-        //class1Att.value = "custom-control-input";
-        //input_init.setAttributeNode(class1Att);
-        taskDiv.appendChild(input_init);
-
-        //Formatting the date
-        date = new Date(taskJson[i].due_date);
-
-        formatDate = (date.getMonth()+1) + '-' + date.getDate() + "-" + date.getFullYear();
-
-
-        //Formatting the time
-        var hours = date.getHours() > 12 ? date.getHours() - 12 : date.getHours();
-        var am_pm = date.getHours() >= 12 ? "PM" : "AM";
-        hours = hours < 10 ? "0" + hours : hours;
-        var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-        var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-        formatTime = hours + ":" + minutes + ":" + seconds + " " + am_pm;
+        //Gets a list of every tr in main.html
+        var rows = document.getElementsByTagName('tr');
         
-        //Building label tag
-        const label_init = document.createElement("label");
+        //We're only allowing one task to be edited at a time
+        onlyOne = false;
 
-        var forAtt = document.createAttribute("for");
-        forAtt.value = "task" + i;
-        label_init.setAttributeNode(forAtt);
+        //For every tr found, look for input tags
+        for(var i=0;i<rows.length;i++) {
+            var checkbox=rows[i].getElementsByTagName("input");  
 
-        //var class2Att = document.createAttribute("class");
-        //class2Att.value = "custom-control-label";
-        //label_init.setAttributeNode(class2Att);
+            //For every input tag found in a tr, find which are checked
+            for (j=0; j < checkbox.length; j++) {
+                
+                //For a checked box,
+                if (checkbox[j].checked) {
 
-        label_init.appendChild(document.createTextNode(taskJson[i].task + ", due on " + formatDate + " at " + formatTime ));
-        taskDiv.appendChild(label_init);
+                    //If a checked box has already been found, break. We're only allowing one to be edited at a time
+                    if (onlyOne === true) {
+                        console.log("Can only edit one task at a time");
+                        break;
+                    }
 
-        //br tag
-        const br2_init = document.createElement("br");
-        taskDiv.appendChild(br2_init);
+                    //Otherwise, the first checkbox has been found
+                    onlyOne = true;
 
+                    //Remember: when the checkbox input tags are created, the full JSON obj is store in the name attr
+                    task = JSON.parse(checkbox[j].name);
+                    console.log("Editing " + task.task);
+
+                    //Data to be sent
+                    //Includes all old info (parsed from JSON obj) and new stuff from modal fields
+                    var send_data = {};
+                        send_data.oldTask = task.task;
+                        send_data.oldDueDate = task.due_date;
+                        send_data.oldPriority = task.priority;
+                        send_data.newtask = taskText;
+                        send_data.newDueDate = dueDate;
+                        send_data.newPriority = priority;
+                        console.log(send_data);
+
+                    /* Will be commented back in when endpoint is created
+                    $.ajax({
+                        url: 'http://localhost:3000/update_task',
+                        type: 'POST',
+                        data: send_data,
+                        success: function(msg){
+                            console.log(JSON.stringify(send_data));
+                            window.location.href = "http://localhost:3000/";
+                        },
+                        error: function(jqXHR,status,err){
+                            console.log(status);
+                            console.log(err);
+                        }
+                    });
+                    */
+                }
+            }
+
+        }
     }
-    //Building submit button for form
-    const but_init = document.createElement("input");
-    
-    var butIdAtt = document.createAttribute("id");
-    butIdAtt.value = "completeBtn";
-    but_init.setAttributeNode(butIdAtt);
-    
-    var butClassAtt = document.createAttribute("class");
-    butClassAtt.value = "btn btn-outline-info";
-    but_init.setAttributeNode(butClassAtt);
-    
-    var butTypeAtt = document.createAttribute("type");
-    butTypeAtt.value = "submit";
-    but_init.setAttributeNode(butTypeAtt);
-    
-    var butValueAtt = document.createAttribute("value");
-    butValueAtt.value = "Complete!";
-    but_init.setAttributeNode(butValueAtt);
-    taskDiv.appendChild(but_init);
-*/
-}
+}    
 
+//Rename?
+//Validations form, aka completion of task
 function alternativeValidation() {
+    //Find every tr tag in main.html
     var rows = document.getElementsByTagName('tr');
     
+    //For every tr tag, look for input tags
     for(var i=0;i<rows.length;i++) {
         var checkbox=rows[i].getElementsByTagName("input");  
 
+        //For every input tag found in the tr, 
         for (j=0; j < checkbox.length; j++) {
 
+            //If checkbox is checked, remove the task from the list
             if (checkbox[j].checked) {
                 taskName = JSON.parse(checkbox[j].name);
                 console.log("Remove " + taskName.task);
 
+                //Data to be sent
+                //Only the task name is needed
                 var send_data = {};
                     send_data.task = taskName.task;
 
+                //POST request to /delete_task endpoint
                 $.ajax({
                     url: 'http://localhost:3000/delete_task',
                     type: 'POST',
@@ -388,34 +461,6 @@ function alternativeValidation() {
         }
 
     }
-}
-
-function validateForm() {
-
-        $.each($("input:checked"), function(){
-            console.log($(this).prop("name"));
-            console.log("here");
-            
-            let taskName = JSON.parse($(this).prop("name"));
-
-            var send_data = {};
-                send_data.task = taskName;  //.task;
-
-            $.ajax({
-                url: 'http://localhost:3000/delete_task',
-                type: 'POST',
-                data: send_data,
-                success: function(msg){
-                    console.log(JSON.stringify(send_data));
-                    window.location.href = "http://localhost:3000/";
-                },
-                error: function(jqXHR,status,err){
-                    console.log(status);
-                    console.log(err);
-                }
-            });
-
-        });
 }
 
 function showRemoveBtn(event) {
