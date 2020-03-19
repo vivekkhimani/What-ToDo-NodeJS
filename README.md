@@ -34,6 +34,7 @@ If you want to see some glimpses of the final product, please navigate to the "s
 ### Tools:
 - Node JS 
 - Express JS
+- Tensorflow JS
 - HTML, Javascript, CSS
 - Bootstrap Framework
 - MySQL Database (Hosted on Google Cloud)
@@ -44,6 +45,7 @@ If you want to see some glimpses of the final product, please navigate to the "s
 - Body-Parser
 - Crypto
 - Express-Session
+- Tensorflow JS
 - Tensorflowp-models (pre-trained Google doc to vec)
 - Compute-cosine-similarity
 
